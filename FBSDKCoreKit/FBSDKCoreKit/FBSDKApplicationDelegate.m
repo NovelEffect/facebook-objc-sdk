@@ -440,4 +440,33 @@ static UIApplicationState _applicationState;
   return _isAppLaunched;
 }
 
+- (void)openURL:(NSURL *)url sender:(id<FBSDKURLOpening>)sender handler:(FBSDKSuccessBlock)handler
+{
+  dispatch_async(dispatch_get_main_queue(), ^{
+    // Dispatch openURL calls to prevent hangs if we're inside the current app delegate's openURL flow already
+    NSOperatingSystemVersion iOS10Version = { .majorVersion = 10, .minorVersion = 0, .patchVersion = 0 };
+    if ([FBSDKInternalUtility isOSRunTimeVersionAtLeast:iOS10Version]) {
+      if (@available(iOS 10.0, *)) {
+        [[UIApplication sharedApplication] openURL:url options:@{} completionHandler:^(BOOL success) {
+          handler(success, nil);
+        }];
+      }
+    } else {
+      BOOL opened = [[UIApplication sharedApplication] openURL:url];
+
+      if ([url.scheme hasPrefix:@"http"] && !opened) {
+        NSOperatingSystemVersion iOS8Version = { .majorVersion = 8, .minorVersion = 0, .patchVersion = 0 };
+        if (![FBSDKInternalUtility isOSRunTimeVersionAtLeast:iOS8Version]) {
+          // Safari openURL calls can wrongly return NO on iOS 7 so manually overwrite that case to YES.
+          // Otherwise we would rather trust in the actual result of openURL
+          opened = YES;
+        }
+      }
+      if (handler) {
+        handler(opened, nil);
+      }
+    }
+  });
+}
+
 @end

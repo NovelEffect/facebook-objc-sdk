@@ -398,6 +398,13 @@ typedef NS_ENUM(NSInteger, FBSDKLoginManagerState) {
     }
   };
 
+  void(^fallbackToBrowserLogin)(NSDictionary *) = ^void(NSDictionary *params) {
+    [self performBrowserLogInWithParameters:params handler:^(BOOL openedURL,
+                                                                  NSError *openedURLError) {
+      completion(openedURL, openedURLError);
+    }];
+  };
+
   if ([FBSDKInternalUtility isFacebookAppInstalled]) {
     [self performNativeLogInWithParameters:loginParams handler:^(BOOL openedURL, NSError *openedURLError) {
       if (openedURLError) {
@@ -407,16 +414,12 @@ typedef NS_ENUM(NSInteger, FBSDKLoginManagerState) {
       if (openedURL) {
         completion(YES, openedURLError);
       } else {
-        [self performBrowserLogInWithParameters:loginParams handler:^(BOOL didOpen, NSError *error) {
-          completion(didOpen, error);
-        }];
+        fallbackToBrowserLogin(loginParams);
       }
     }];
   }
   else {
-    [self performBrowserLogInWithParameters:loginParams handler:^(BOOL didOpen, NSError *error) {
-      completion(didOpen, error);
-    }];
+    fallbackToBrowserLogin(loginParams);
   }
 }
 

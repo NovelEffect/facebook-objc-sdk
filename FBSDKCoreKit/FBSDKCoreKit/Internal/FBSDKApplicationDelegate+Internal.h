@@ -44,7 +44,6 @@ FOUNDATION_EXPORT NSString *const FBSDKApplicationDidBecomeActiveNotification;
 - (void)removeObserver:(id<FBSDKApplicationObserving>)observer;
 + (BOOL)isSDKInitialized;
 + (UIApplicationState)applicationState;
-- (void)openURL:(NSURL *)url sender:(id<FBSDKURLOpening>)sender handler:(FBSDKSuccessBlock)handler;
 
 @end
 

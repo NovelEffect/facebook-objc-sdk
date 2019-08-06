@@ -483,7 +483,7 @@ typedef NS_ENUM(NSInteger, FBSDKLoginManagerState) {
   NSURL *authURL = [FBSDKInternalUtility URLWithScheme:scheme host:@"authorize" path:@"" queryParameters:mutableParams error:&error];
 
   NSDate *start = [NSDate date];
-  [[FBSDKApplicationDelegate sharedInstance] openURL:authURL sender:self handler:^(BOOL openedURL, NSError *anError) {
+  [[FBSDKBridgeAPI sharedInstance] openURL:authURL sender:self handler:^(BOOL openedURL, NSError *anError) {
     [self->_logger logNativeAppDialogResult:openedURL dialogDuration:-start.timeIntervalSinceNow];
     if (handler) {
       handler(openedURL, anError);
